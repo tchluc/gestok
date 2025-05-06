@@ -3,7 +3,7 @@ from database import DatabaseConnection, Categorie, Produit, Fournisseur, Approv
 import uuid
 from datetime import datetime
 
-app = Flask(__name__)
+app = Flask(__name__, template_folder="../templates", static_folder="../static")
 db = DatabaseConnection()
 
 # Route pour la page d'approvisionnements
@@ -28,8 +28,19 @@ def get_approvisionnements():
     conn = db.get_connection()
     appro_table = Approvisionnement("", "", 0, 0.0, "", "", "").db_table
     approvisionnements = appro_table.select_all(conn)
+    # Ajuster les clés pour correspondre aux colonnes de la base
+    result = [{
+        'APPROV_ID': a['APPROV_ID'],
+        'DATE_APPROV': a['DATE_APPROV'],
+        'QUANTITE': a['QUANTITE'],
+        'PRIX_ACQUIS': a['PRIX_ACQUIS'],
+        'PRODUIT_ID': a['PRODUIT_ID'],
+        'FOURNISSEUR_ID': a['FOURNISSEUR_ID'],
+        'REF': a['REF'],
+        'NOTES': a['NOTES']
+    } for a in approvisionnements]
     conn.close()
-    return jsonify(approvisionnements)
+    return jsonify(result)
 
 # API: Ajouter un approvisionnement
 @app.route('/api/approvisionnements', methods=['POST'])
@@ -48,7 +59,6 @@ def add_approvisionnement():
         notes=data.get('notes', '')
     )
     conn = db.get_connection()
-    # Vérifier l'existence du produit et du fournisseur
     produit_table = Produit("", "", 0, 0.0).db_table
     fournisseur_table = Fournisseur("", "", "", "").db_table
     produit = produit_table.select_one(conn, 'PRODUIT_ID', approvisionnement.produit_id)
@@ -56,9 +66,7 @@ def add_approvisionnement():
     if not produit or not fournisseur:
         conn.close()
         return jsonify({'error': 'Produit ou fournisseur introuvable'}), 404
-    # Insérer l'approvisionnement
     approvisionnement.db_table.insert_one(conn, approvisionnement.format_dict())
-    # Mettre à jour le stock du produit
     produit['QTE_STOCK'] += approvisionnement.qte
     produit_table.update_one(conn, 'PRODUIT_ID', approvisionnement.produit_id, {
         'QTE_STOCK': produit['QTE_STOCK']
@@ -76,11 +84,10 @@ def delete_approvisionnement(approv_id):
         conn.close()
         return jsonify({'error': 'Approvisionnement introuvable'}), 404
     appro_table.delete_one(conn, 'APPROV_ID', approv_id)
-    # Optionnel : Ajuster le stock du produit si nécessaire
     produit_table = Produit("", "", 0, 0.0).db_table
     produit = produit_table.select_one(conn, 'PRODUIT_ID', appro['PRODUIT_ID'])
     if produit:
-        produit['QTE_STOCK'] = max(0, produit['QTE_STOCK'] - appro['QTE'])
+        produit['QTE_STOCK'] = max(0, produit['QTE_STOCK'] - appro['QUANTITE'])
         produit_table.update_one(conn, 'PRODUIT_ID', appro['PRODUIT_ID'], {
             'QTE_STOCK': produit['QTE_STOCK']
         })
@@ -140,5 +147,5 @@ def add_fournisseur():
     return jsonify({'message': 'Fournisseur ajouté avec succès'}), 201
 
 if __name__ == '__main__':
-    db.initialize()  # Créer la base de données et les tables si elles n'existent pas
+    db.initialize()
     app.run(debug=True)
