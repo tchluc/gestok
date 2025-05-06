@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Système de gestion d'approvisionnement">
+    <title>Gestion d'Approvisionnement</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+<div class="layout">
+    <nav class="sidebar">
+        <div class="sidebar-header">
+            <h2><i class="fas fa-store"></i> <span>GesStock</span></h2>
+        </div>
+        <ul class="menu">
+            <li><a href="/"><i class="fas fa-home"></i> <span>Accueil</span></a></li>
+            <li class="active"><a href="/approvisionnements"><i class="fas fa-truck-loading"></i> <span>Approvisionnement</span></a></li>
+            <li><a href="/produits"><i class="fas fa-box"></i> <span>Produits</span></a></li>
+            <li><a href="/fournisseurs"><i class="fas fa-users"></i> <span>Fournisseurs</span></a></li>
+        </ul>
+        <div class="sidebar-footer">
+            <a href="/logout"><i class="fas fa-sign-out-alt"></i> <span>Déconnexion</span></a>
+        </div>
+    </nav>
+
+    <div class="main-content">
+        <header class="top-bar">
+            <button id="toggle-sidebar" class="toggle-btn">
+                <i class="fas fa-bars"></i>
+            </button>
+            <h1>Gestion d'Approvisionnement</h1>
+        </header>
+
+        <div class="container">
+            <div class="dashboard-header">
+                <h2><i class="fas fa-truck-loading"></i> Dashboard Approvisionnement</h2>
+                <div class="quick-stats">
+                    <div class="stat-card">
+                        <div class="stat-icon"><i class="fas fa-boxes"></i></div>
+                        <div class="stat-info">
+                            <span class="stat-value" id="total-supplies">0</span>
+                            <span class="stat-label">Approvisionnements</span>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon"><i class="fas fa-euro-sign"></i></div>
+                        <div class="stat-info">
+                            <span class="stat-value" id="total-cost">0,00 XOF</span>
+                            <span class="stat-label">Coût total</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="tabs">
+                <div class="tab active" data-tab="form-tab">
+                    <i class="fas fa-plus-circle"></i> Ajouter Approvisionnement
+                </div>
+                <div class="tab" data-tab="list-tab">
+                    <i class="fas fa-list"></i> Liste Approvisionnements
+                </div>
+            </div>
+
+            <div id="form-tab" class="tab-content active">
+                <form id="supply-form">
+                    <div class="form-header">
+                        <div class="form-group">
+                            <label for="supply-date">Date d'approvisionnement</label>
+                            <input type="date" id="supply-date" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="supply-ref">Référence</label>
+                            <input type="text" id="supply-ref" placeholder="Référence du document">
+                        </div>
+                    </div>
+
+                    <h3><i class="fas fa-clipboard-list"></i> Articles</h3>
+                    <div id="supply-entries">
+                        <div class="supply-entry">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>Produit</label>
+                                    <select class="product-name" required>
+                                        <option value="" disabled selected>Sélectionner un produit</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label>Quantité</label>
+                                    <input type="number" class="quantity" required min="1">
+                                </div>
+                                <div class="form-group">
+                                    <label>Prix</label>
+                                    <input type="number" class="price" required min="0.01" step="0.01">
+                                </div>
+                                <div class="form-group">
+                                    <label>Fournisseur</label>
+                                    <select class="supplier" required>
+                                        <option value="" disabled selected>Sélectionner un fournisseur</option>
+                                    </select>
+                                </div>
+                                <div class="form-actions">
+                                    <button type="button" class="delete-entry-btn">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="form-row wide">
+                                <div class="form-group wide">
+                                    <label>Notes</label>
+                                    <textarea class="entry-notes" placeholder="Notes sur cet article (optionnel)"></textarea>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button type="button" id="add-entry-btn" class="add-entry-btn">
+                        <i class="fas fa-plus"></i> Ajouter un article
+                    </button>
+
+                    <div class="summary-section">
+                        <div class="summary-row">
+                            <span>Total des articles:</span>
+                            <span id="total-items">1</span>
+                        </div>
+                        <div class="summary-row">
+                            <span>Montant total:</span>
+                            <span id="total-amount">0,00 XOF</span>
+                        </div>
+                    </div>
+
+                    <div class="form-actions main-actions">
+                        <button type="button" id="save-btn" class="primary-btn">
+                            <i class="fas fa-save"></i> Enregistrer
+                        </button>
+                        <button type="button" id="cancel-btn" class="secondary-btn">
+                            <i class="fas fa-times"></i> Annuler
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <div id="list-tab" class="tab-content">
+                <div class="filter-section">
+                    <div class="search-bar">
+                        <input type="text" id="search-input" placeholder="Rechercher...">
+                        <button id="search-btn"><i class="fas fa-search"></i></button>
+                    </div>
+                    <div class="filter-options">
+                        <div class="date-filter">
+                            <label for="date-from">Du:</label>
+                            <input type="date" id="date-from">
+                            <label for="date-to">Au:</label>
+                            <input type="date" id="date-to">
+                        </div>
+                        <div class="supplier-filter">
+                            <select id="filter-supplier">
+                                <option value="">Tous les fournisseurs</option>
+                            </select>
+                        </div>
+                        <button id="apply-filters" class="primary-btn">
+                            <i class="fas fa-filter"></i> Filtrer
+                        </button>
+                        <button id="reset-filters" class="secondary-btn">
+                            <i class="fas fa-undo"></i> Réinitialiser
+                        </button>
+                    </div>
+                </div>
+
+                <div class="table-responsive">
+                    <table id="supply-table" class="data-table">
+                        <thead>
+                        <tr>
+                            <th>Référence</th>
+                            <th>Nom Produit</th>
+                            <th>Quantité</th>
+                            <th>Prix (XOF)</th>
+                            <th>Total</th>
+                            <th>Fournisseur</th>
+                            <th>Notes</th>
+                            <th>Date</th>
+                            <th>Actions</th>
+                        </tr>
+                        </thead>
+                        <tbody id="supply-list"></tbody>
+                    </table>
+                </div>
+
+                <div class="pagination">
+                    <button id="prev-page" disabled><i class="fas fa-chevron-left"></i></button>
+                    <span id="page-info">Page 1 sur 1</span>
+                    <button id="next-page" disabled><i class="fas fa-chevron-right"></i></button>
+                </div>
+
+                <div class="export-options">
+                    <button id="export-csv" class="secondary-btn">
+                        <i class="fas fa-file-csv"></i> Exporter CSV
+                    </button>
+                    <button id="export-pdf" class="secondary-btn">
+                        <i class="fas fa-file-pdf"></i> Exporter PDF
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="delete-modal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3><i class="fas fa-exclamation-triangle"></i> Confirmation</h3>
+            <button class="close-modal">×</button>
+        </div>
+        <div class="modal-body">
+            <p>Êtes-vous sûr de vouloir supprimer cet approvisionnement ?</p>
+        </div>
+        <div class="modal-buttons">
+            <button id="confirm-delete" class="danger-btn">Supprimer</button>
+            <button id="cancel-delete" class="secondary-btn">Annuler</button>
+        </div>
+    </div>
+</div>
+
+<div id="details-modal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3><i class="fas fa-info-circle"></i> Détails de l'approvisionnement</h3>
+            <button class="close-modal">×</button>
+        </div>
+        <div class="modal-body" id="supply-details"></div>
+    </div>
+</div>
+
+<script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>
