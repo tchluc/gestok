@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <title>Accueil</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+<nav class="sidebar">
+    <div class="sidebar-header">
+        <h2><i class="fas fa-store"></i> GesStock</h2>
+    </div>
+    <ul class="menu">
+        <li class="active"><a href="home.html"><i class="fas fa-home"></i> Accueil</a></li>
+        <li ><a href="supply.html"><i class="fas fa-truck-loading"></i> Approvisionnement</a></li>
+        <li><a href="products.html"><i class="fas fa-box"></i> Produits</a></li>
+        <li><a href="suppliers.html"><i class="fas fa-users"></i> Fournisseurs</a></li>
+    </ul>
+    <div class="sidebar-footer">
+        <a href="logout.html"><i class="fas fa-sign-out-alt"></i> Déconnexion</a>
+    </div>
+</nav>
+<div class="main-content">
+    <div class="container">
+        <h2>Bienvenue !</h2>
+        <p>Ceci est la page d'accueil de votre application de gestion de stock. Utilisez le menu à gauche pour naviguer vers le dashboard d'approvisionnement ou la liste des produits.</p>
+    </div>
+</div>
+</body>
+</html>

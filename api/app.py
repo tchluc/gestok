@@ -3,6 +3,9 @@ from database import DatabaseConnection, Categorie, Produit, Fournisseur, Approv
 import uuid
 from datetime import datetime
 
+app = Flask(__name__)
+db = DatabaseConnection()
+
 app = Flask(__name__, template_folder="../templates", static_folder="../static")
 db = DatabaseConnection()
 
@@ -28,19 +31,8 @@ def get_approvisionnements():
     conn = db.get_connection()
     appro_table = Approvisionnement("", "", 0, 0.0, "", "", "").db_table
     approvisionnements = appro_table.select_all(conn)
-    # Ajuster les clés pour correspondre aux colonnes de la base
-    result = [{
-        'APPROV_ID': a['APPROV_ID'],
-        'DATE_APPROV': a['DATE_APPROV'],
-        'QUANTITE': a['QUANTITE'],
-        'PRIX_ACQUIS': a['PRIX_ACQUIS'],
-        'PRODUIT_ID': a['PRODUIT_ID'],
-        'FOURNISSEUR_ID': a['FOURNISSEUR_ID'],
-        'REF': a['REF'],
-        'NOTES': a['NOTES']
-    } for a in approvisionnements]
     conn.close()
-    return jsonify(result)
+    return jsonify(approvisionnements)
 
 # API: Ajouter un approvisionnement
 @app.route('/api/approvisionnements', methods=['POST'])
@@ -87,7 +79,7 @@ def delete_approvisionnement(approv_id):
     produit_table = Produit("", "", 0, 0.0).db_table
     produit = produit_table.select_one(conn, 'PRODUIT_ID', appro['PRODUIT_ID'])
     if produit:
-        produit['QTE_STOCK'] = max(0, produit['QTE_STOCK'] - appro['QUANTITE'])
+        produit['QTE_STOCK'] = max(0, produit['QTE_STOCK'] - appro['QTE'])
         produit_table.update_one(conn, 'PRODUIT_ID', appro['PRODUIT_ID'], {
             'QTE_STOCK': produit['QTE_STOCK']
         })

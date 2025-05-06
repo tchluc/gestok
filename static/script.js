@@ -67,9 +67,9 @@ async function updateStats() {
   filteredSupplies = [...supplies];
   const totalSupplies = supplies.length;
   const totalCost = supplies.reduce((sum, supply) => {
-    const quantite = parseFloat(supply.QUANTITE) || 0;
+    const qte = parseFloat(supply.QTE) || 0;
     const prix = parseFloat(supply.PRIX_ACQUIS) || 0;
-    return sum + (quantite * prix);
+    return sum + (qte * prix);
   }, 0);
   document.getElementById('total-supplies').textContent = totalSupplies;
   document.getElementById('total-cost').textContent = totalCost.toFixed(2) + ' XOF';
@@ -102,15 +102,15 @@ async function renderSupplies(page = 1) {
   paginatedSupplies.forEach((supply, index) => {
     const product = products.find(p => p.PRODUIT_ID === supply.PRODUIT_ID);
     const supplier = suppliers.find(s => s.FOURNISSEUR_ID === supply.FOURNISSEUR_ID);
-    const quantite = parseFloat(supply.QUANTITE) || 0;
     const prixAcquis = parseFloat(supply.PRIX_ACQUIS) || 0;
-    const total = quantite * prixAcquis;
+    const qte = parseFloat(supply.QTE) || 0;
+    const total = qte * prixAcquis;
     const row = document.createElement('tr');
     row.classList.add('fade-in');
     row.innerHTML = `
       <td>${supply.REF || '-'}</td>
       <td>${product ? product.LIBELLE : supply.PRODUIT_ID}</td>
-      <td>${supply.QUANTITE !== undefined ? quantite : 'undefined'}</td>
+      <td>${supply.QTE !== undefined ? qte : 'undefined'}</td>
       <td>${!isNaN(prixAcquis) ? prixAcquis.toFixed(2) : '0.00'}</td>
       <td>${!isNaN(total) ? total.toFixed(2) : '0.00'}</td>
       <td>${supplier ? supplier.NOM : supply.FOURNISSEUR_ID}</td>
@@ -442,15 +442,12 @@ async function showDetails(index) {
   const supplier = suppliers.find(s => s.FOURNISSEUR_ID === supply.FOURNISSEUR_ID);
   const modal = document.getElementById('details-modal');
   const details = document.getElementById('supply-details');
-  const quantite = parseFloat(supply.QUANTITE) || 0;
-  const prixAcquis = parseFloat(supply.PRIX_ACQUIS) || 0;
-  const total = quantite * prixAcquis;
   details.innerHTML = `
     <p><strong>Référence:</strong> ${supply.REF || '-'}</p>
     <p><strong>Produit:</strong> ${product ? product.LIBELLE : supply.PRODUIT_ID}</p>
-    <p><strong>Quantité:</strong> ${supply.QUANTITE !== undefined ? quantite : 'undefined'}</p>
-    <p><strong>Prix unitaire:</strong> ${!isNaN(prixAcquis) ? prixAcquis.toFixed(2) : '0.00'} XOF</p>
-    <p><strong>Total:</strong> ${!isNaN(total) ? total.toFixed(2) : '0.00'} XOF</p>
+    <p><strong>Quantité:</strong> ${supply.QTE !== undefined ? parseFloat(supply.QTE) || 0 : 'undefined'}</p>
+    <p><strong>Prix unitaire:</strong> ${!isNaN(parseFloat(supply.PRIX_ACQUIS)) ? parseFloat(supply.PRIX_ACQUIS).toFixed(2) : '0.00'} XOF</p>
+    <p><strong>Total:</strong> ${!isNaN(parseFloat(supply.QTE) * parseFloat(supply.PRIX_ACQUIS)) ? (parseFloat(supply.QTE) * parseFloat(supply.PRIX_ACQUIS)).toFixed(2) : '0.00'} XOF</p>
     <p><strong>Fournisseur:</strong> ${supplier ? supplier.NOM : supply.FOURNISSEUR_ID}</p>
     <p><strong>Notes:</strong> ${supply.NOTES || '-'}</p>
     <p><strong>Date:</strong> ${new Date(supply.DATE_APPROV).toLocaleDateString('fr-FR')}</p>
